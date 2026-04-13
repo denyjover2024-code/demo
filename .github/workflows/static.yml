@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2d8cff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Fuel Calc" />
+  <title>Office Fuel Calculator Mobile</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: linear-gradient(180deg, #eefcf5 0%, #eef7ff 100%);
+      --panel: #ffffff;
+      --panel-soft: #f3fffa;
+      --border: #cfeee2;
+      --border-strong: #b9e3ff;
+      --text: #16324f;
+      --muted: #5f7d95;
+      --primary: #2d8cff;
+      --primary-dark: #1f6fd1;
+      --accent: #33b98a;
+      --accent-soft: #e8fbf3;
+      --blue-soft: #edf6ff;
+      --shadow: 0 10px 30px rgba(34, 87, 122, 0.10);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
+      padding-top: var(--safe-top);
+      padding-bottom: calc(var(--safe-bottom) + 18px);
+    }
+    .container {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding: 14px;
+    }
+    .hero {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin: -14px -14px 14px;
+      padding: 16px 14px 12px;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(238,252,245,0.96) 0%, rgba(238,247,255,0.88) 100%);
+      border-bottom: 1px solid rgba(185, 227, 255, 0.8);
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      line-height: 1.15;
+      text-align: center;
+      color: #1d5f8c;
+    }
+    p.subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .install-tip {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+    }
+    form, .summary, .formula-box, .note {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+    form {
+      padding: 14px;
+    }
+    .section-title {
+      margin: 0 0 12px;
+      color: #1b6286;
+      font-size: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    label {
+      font-weight: 700;
+      margin-bottom: 7px;
+      font-size: 13px;
+      color: #1b6286;
+      line-height: 1.35;
+    }
+    input, select {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      font-size: 16px;
+      background: #fff;
+      color: var(--text);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input[readonly] {
+      background: #f7fffb;
+    }
+    input:disabled, select:disabled {
+      background: #eef4f8;
+      color: #6f8798;
+      opacity: 1;
+      cursor: not-allowed;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(45, 140, 255, 0.14);
+    }
+    .helper {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .results {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .card {
+      background: linear-gradient(180deg, var(--panel-soft) 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 8px 18px rgba(40, 113, 120, 0.08);
+    }
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      color: #257598;
+      line-height: 1.35;
+    }
+    .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #134f7b;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+    .summary, .formula-box, .note {
+      margin-top: 16px;
+      padding: 16px;
+      line-height: 1.65;
+    }
+    .summary {
+      background: linear-gradient(180deg, var(--accent-soft) 0%, var(--blue-soft) 100%);
+    }
+    .formula-box h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      color: #1b6286;
+    }
+    .note {
+      font-size: 13px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.78);
+    }
+    .actions {
+      position: sticky;
+      bottom: 8px;
+      z-index: 15;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 8px 0 calc(var(--safe-bottom) + 2px);
+      background: linear-gradient(180deg, rgba(238,247,255,0) 0%, rgba(238,247,255,0.95) 25%, rgba(238,247,255,0.98) 100%);
+      backdrop-filter: blur(8px);
+    }
+    button {
+      min-height: 50px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+      color: white;
+      box-shadow: 0 8px 18px rgba(45, 140, 255, 0.22);
+    }
+    .secondary {
+      background: var(--blue-soft);
+      color: #1d5f8c;
+      border: 1px solid var(--border-strong);
+    }
+    @media (min-width: 700px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 420px) {
+      .results {
+        grid-template-columns: 1fr;
+      }
+      .actions {
+        grid-template-columns: 1fr;
+      }
+      h1 {
+        font-size: 22px;
+      }
+      .value {
+        font-size: 19px;
+      }
+    }
+
+    .history-section {
+      margin-top: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .history-section h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: #1b6286;
+    }
+    .history-table-wrap {
+      margin-top: 10px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+    }
+    .history-table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 11px;
+      line-height: 1.35;
+      background: #fff;
+    }
+    .history-table th,
+    .history-table td {
+      border-bottom: 1px solid #e8f2fb;
+      padding: 6px 5px;
+      text-align: left;
+      vertical-align: top;
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .history-table th {
+      position: sticky;
+      top: 0;
+      background: #edf6ff;
+      color: #1d5f8c;
+      font-size: 10px;
+      line-height: 1.25;
+      z-index: 1;
+    }
+    .history-table tbody tr:nth-child(even) {
+      background: #fbfeff;
+    }
+    .history-table tbody tr.latest-entry {
+      background: #eef8ff;
+      outline: 2px solid rgba(45, 140, 255, 0.35);
+    }
+    .history-table .na {
+      color: var(--muted);
+      font-style: italic;
+    }
+    .history-table .money,
+    .history-table .num {
+      text-align: right;
+    }
+    .history-table th:nth-child(1),
+    .history-table td:nth-child(1) { width: 36px; }
+    .history-table th:nth-child(2),
+    .history-table td:nth-child(2) { width: 64px; }
+    .history-table th:nth-child(3),
+    .history-table td:nth-child(3) { width: 92px; }
+    .history-table th:nth-child(4),
+    .history-table td:nth-child(4) { width: 76px; }
+    .history-table th:nth-child(5),
+    .history-table td:nth-child(5) { width: 96px; }
+    .history-table th:nth-child(6),
+    .history-table td:nth-child(6) { width: 96px; }
+    .history-table th:nth-child(7),
+    .history-table td:nth-child(7) { width: 58px; }
+    .history-table th:nth-child(8),
+    .history-table td:nth-child(8) { width: 72px; }
+    .history-table th:nth-child(9),
+    .history-table td:nth-child(9) { width: 64px; }
+    .history-table th:nth-child(10),
+    .history-table td:nth-child(10) { width: 66px; }
+    .history-table th:nth-child(11),
+    .history-table td:nth-child(11) { width: 72px; }
+    .history-total {
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #134f7b;
+      text-align: right;
+    }
+    @media (max-width: 560px) {
+      .history-section {
+        padding: 12px;
+      }
+      .history-table {
+        min-width: 620px;
+        font-size: 10px;
+      }
+      .history-table th {
+        font-size: 9px;
+      }
+      .history-table th,
+      .history-table td {
+        padding: 5px 4px;
+      }
+      .history-total {
+        font-size: 13px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>Office Fuel Calculator</h1>
+      <p class="subtitle">Mobile-ready weekly fuel-price calculator for Iloilo City based on Petron weekly pump prices</p>
+      <div class="install-tip" id="installTip">Open this in Chrome or Safari, then use <strong>Add to Home Screen</strong> to install it like an app.</div>
+    </div>
+
+    <form id="fuelForm">
+      <h2 class="section-title">Vehicle and Fuel Details</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="plateNumber">1. Plate Number or MVUC No. or Machinery</label>
+          <input type="text" id="plateNumber" placeholder="Enter plate number, MVUC no., or machinery" />
+        </div>
+
+        <div class="field">
+          <label for="vehicleCategory">2. Vehicle Category</label>
+          <select id="vehicleCategory">
+            <option value="">Select category</option>
+            <option>Internal Combustion Engine</option>
+            <option>Electric Vehicle</option>
+            <option>Not Applicable</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="vehicleType">3. Vehicle Type / Other Machinery</label>
+          <select id="vehicleType">
+            <option value="">Select vehicle type or machinery</option>
+            <option>Service Vehicle</option>
+            <option>Heavy Equipment</option>
+            <option>Chainsaw</option>
+            <option>Grass Cutter</option>
+            <option>Others</option>
+          </select>
+          <div class="helper">Choose a vehicle or machinery type, or select Others to enter your own.</div>
+        </div>
+
+        <div class="field" id="vehicleTypeOtherField" style="display:none;">
+          <label for="vehicleTypeOther">Others Vehicle Type / Machinery</label>
+          <input type="text" id="vehicleTypeOther" placeholder="Enter custom vehicle or machinery type" />
+        </div>
+
+        <div class="field" id="engineTypeField" style="display:none;">
+          <label for="engineType">3A. Engine Type / Cycle</label>
+          <select id="engineType"></select>
+          <div class="helper" id="engineTypeHelper">Select the engine cycle for this equipment.</div>
+        </div>
+
+        <div class="field">
+          <label for="fuelType">4. Fuel Type</label>
+          <select id="fuelType">
+            <option value="">Select fuel type</option>
+            <option>Diesel</option>
+            <option>Gasoline</option>
+            <option>Electric</option>
+          </select>
+          <div class="helper" id="fuelTypeHelper">Select the fuel used by this vehicle or equipment.</div>
+        </div>
+
+        <div class="field">
+          <label for="priceWeek">Weekly Fuel Price Period</label>
+          <select id="priceWeek"></select>
+          <div class="helper">Choose the weekly period to auto-load the Iloilo City price, or select Manual Weekly Period.</div>
+        </div>
+
+        <div class="field">
+          <label for="manualWeekPeriod">Manual Weekly Fuel Price Period</label>
+          <input type="text" id="manualWeekPeriod" placeholder="Example: Apr 12 - Apr 18, 2026" />
+          <div class="helper">Use this when you select Manual Weekly Period.</div>
+        </div>
+
+        <div class="field">
+          <label for="fuelProduct">Fuel Product / Grade</label>
+          <select id="fuelProduct"></select>
+          <div class="helper">Gasoline uses Xtra Advance (RON 91) or XCS (RON 95). Diesel uses Diesel Max or Turbo Diesel.</div>
+        </div>
+
+        <div class="field">
+          <label for="consumption">5. Consumption</label>
+          <input type="number" id="consumption" min="0" step="0.01" placeholder="Liter or kWh" />
+        </div>
+
+        <div class="field">
+          <label for="distance">6. Distance (km)</label>
+          <input type="number" id="distance" min="0" step="0.01" placeholder="Enter distance traveled" />
+          <div class="helper" id="distanceHelper">Enter distance traveled for vehicle-based computation.</div>
+        </div>
+
+        <div class="field">
+          <label for="costPerLiter">Weekly Cost per Liter</label>
+          <input type="number" id="costPerLiter" min="0" step="0.01" placeholder="Auto-filled or manual" />
+          <div class="helper">Formula source for ICE vehicles: selected weekly price based on week and fuel product.</div>
+        </div>
+
+        <div class="field">
+          <label for="totalCost">7. Total Cost of Consumption</label>
+          <input type="number" id="totalCost" min="0" step="0.01" placeholder="Auto or manual total cost" />
+          <div class="helper">Formula: Total Cost = Consumption × Weekly Cost per Liter.</div>
+        </div>
+
+        <div class="field">
+          <label for="brand">8. Brand</label>
+          <input type="text" id="brand" placeholder="Enter vehicle brand" value="Petron" />
+        </div>
+
+        <div class="field">
+          <label for="vehicleName">9. Name of Vehicle or Machinery</label>
+          <input type="text" id="vehicleName" placeholder="Enter vehicle or machinery name" />
+        </div>
+
+        <div class="field">
+          <label for="model">10. Model</label>
+          <input type="text" id="model" placeholder="Enter model" />
+        </div>
+
+        <div class="field">
+          <label for="yearAcquired">11. Year Acquired</label>
+          <input type="number" id="yearAcquired" min="1900" max="2100" step="1" placeholder="Enter year acquired" />
+        </div>
+
+        <div class="field">
+          <label for="transmission">12. Transmission</label>
+          <select id="transmission">
+            <option value="">Select transmission</option>
+            <option>Manual</option>
+            <option>Automatic</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="ownership">13. Ownership</label>
+          <select id="ownership">
+            <option value="">Select ownership</option>
+            <option>Rental</option>
+            <option>Government</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="monthly">14. Monthly</label>
+          <select id="monthly">
+            <option value="">Select month</option>
+            <option>January</option>
+            <option>February</option>
+            <option>March</option>
+            <option>April</option>
+            <option>May</option>
+            <option>June</option>
+            <option>July</option>
+            <option>August</option>
+            <option>September</option>
+            <option>October</option>
+            <option>November</option>
+            <option>December</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primary" onclick="calculateFuelData()">Calculate</button>
+        <button type="reset" class="secondary" onclick="resetResults()">Reset</button>
+      </div>
+    </form>
+
+    <div class="results">
+      <div class="card">
+        <h3>Selected Weekly Price</h3>
+        <div class="value" id="rateCard">0.00</div>
+      </div>
+      <div class="card">
+        <h3>Fuel Efficiency</h3>
+        <div class="value" id="fuelEfficiency">0.00 km/L</div>
+      </div>
+      <div class="card">
+        <h3>Cost per Kilometer</h3>
+        <div class="value" id="costPerKm">0.00</div>
+      </div>
+      <div class="card">
+        <h3>Total Cost</h3>
+        <div class="value" id="totalCostCard">0.00</div>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <h3>Formula</h3>
+      <div><strong>Weekly Cost per Liter</strong> = selected weekly fuel price based on Period + Fuel Product</div>
+      <div><strong>Total Cost of Consumption</strong> = Consumption × Weekly Cost per Liter</div>
+      <div><strong>Fuel Efficiency</strong> = Distance ÷ Consumption</div>
+      <div><strong>Cost per Kilometer</strong> = Total Cost ÷ Distance</div>
+    </div>
+
+    <div class="summary" id="summaryBox">
+      Enter vehicle or machinery details and tap <strong>Calculate</strong> to see the result summary. Every calculation will be added to the table below. For <strong>Chainsaw</strong>, <strong>Grass Cutter</strong>, and <strong>Others</strong>, the result and total will also appear below.
+    </div>
+
+    
+    <div class="history-section" id="historySection">
+      <h3>Calculation Summary Table</h3>
+      <div class="helper">Every tap on <strong>Calculate</strong> adds one row below. The table uses a smaller font so it fits better on mobile.</div>
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Month</th>
+              <th>Plate / MVUC / Machinery</th>
+              <th>Vehicle Category</th>
+              <th>Vehicle / Machinery Type</th>
+              <th>Name of Vehicle or Machinery</th>
+              <th>Fuel Type</th>
+              <th>Consumption</th>
+              <th>Distance</th>
+              <th>Weekly Price</th>
+              <th>Total Cost</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr id="historyEmptyRow">
+              <td colspan="11" style="text-align:center; color:#5f7d95;">No calculated entries yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="history-total">
+        Grand Total: <span id="grandTotalValue">0.00</span>
+      </div>
+    </div>
+
+    <div class="note">
+      Note: This mobile version is based on the uploaded weekly Petron pump prices for Iloilo City. Prices are treated as weekly reference values in pesos per liter. Chainsaws typically use 2-stroke gasoline engines that need a fuel-oil mix. Grass cutters may use either 2-stroke engines for heavier-duty work or 4-stroke engines for quieter, more fuel-efficient residential use. For electric vehicles, you can manually enter the cost per kWh and total cost.
+    </div>
+  </div>
+
+  <script>
+    const WEEKLY_PRICES = {
+      "2026-01-06_2026-01-12": { label: "Jan 6 - Jan 12, 2026", xtraAdvance91: 50.00, xcs95: 51.00, dieselMax: 48.00, turboDiesel: 56.00 },
+      "2026-01-13_2026-01-19": { label: "Jan 13 - Jan 19, 2026", xtraAdvance91: 49.50, xcs95: 50.50, dieselMax: 47.50, turboDiesel: 55.50 },
+      "2026-01-20_2026-01-26": { label: "Jan 20 - Jan 26, 2026", xtraAdvance91: 49.90, xcs95: 50.90, dieselMax: 48.90, turboDiesel: 56.90 },
+      "2026-01-27_2026-02-02": { label: "Jan 27 - Feb 2, 2026", xtraAdvance91: 50.30, xcs95: 51.30, dieselMax: 50.30, turboDiesel: 58.30 },
+      "2026-02-03_2026-02-09": { label: "Feb 3 - Feb 9, 2026", xtraAdvance91: 51.10, xcs95: 52.10, dieselMax: 51.90, turboDiesel: 59.90 },
+      "2026-02-10_2026-02-16": { label: "Feb 10 - Feb 16, 2026", xtraAdvance91: 51.30, xcs95: 52.30, dieselMax: 51.00, turboDiesel: 59.00 },
+      "2026-02-17_2026-02-23": { label: "Feb 17 - Feb 23, 2026", xtraAdvance91: 51.50, xcs95: 52.50, dieselMax: 50.50, turboDiesel: 58.50 },
+      "2026-02-24_2026-03-02": { label: "Feb 24 - Mar 2, 2026", xtraAdvance91: 51.50, xcs95: 52.50, dieselMax: 50.50, turboDiesel: 58.50 },
+      "2026-03-03_2026-03-09": { label: "Mar 3 - Mar 9, 2026", xtraAdvance91: 51.50, xcs95: 52.50, dieselMax: 51.00, turboDiesel: 58.50 },
+      "2026-03-10_2026-03-16": { label: "Mar 10 - Mar 16, 2026", xtraAdvance91: 68.00, xcs95: 69.50, dieselMax: 81.00, turboDiesel: 88.50 },
+      "2026-03-17_2026-03-23": { label: "Mar 17 - Mar 23, 2026", xtraAdvance91: 84.50, xcs95: 86.00, dieselMax: 111.00, turboDiesel: 118.50 },
+      "2026-03-24_2026-03-30": { label: "Mar 24 - Mar 30, 2026", xtraAdvance91: 110.00, xcs95: 111.50, dieselMax: 141.50, turboDiesel: 149.00 },
+      "2026-03-31_2026-04-06": { label: "Mar 31 - Apr 6, 2026", xtraAdvance91: 114.50, xcs95: 116.50, dieselMax: 145.50, turboDiesel: 152.00 },
+      "2026-04-07_present": { label: "Apr 7 - Apr 11, 2026", xtraAdvance91: 116.50, xcs95: 119.00, dieselMax: 147.00, turboDiesel: 154.50 },
+      "manual_period": { label: "Manual Weekly Period", xtraAdvance91: null, xcs95: null, dieselMax: null, turboDiesel: null }
+    };
+
+    const PRODUCT_OPTIONS = {
+      Gasoline: [
+        { value: 'xtraAdvance91', label: 'Petron Xtra Advance (RON 91)' },
+        { value: 'xcs95', label: 'Petron XCS (RON 95)' }
+      ],
+      Diesel: [
+        { value: 'dieselMax', label: 'Petron Diesel Max' },
+        { value: 'turboDiesel', label: 'Petron Turbo Diesel' }
+      ],
+      Electric: [
+        { value: 'manualElectric', label: 'Manual electric rate' }
+      ]
+    };
+
+    const ENGINE_OPTIONS = {
+      Chainsaw: {
+        options: [
+          { value: '2-Stroke', label: '2-Stroke (fuel-oil mix required)' }
+        ],
+        helper: 'Chainsaws typically use 2-stroke engines and require gasoline mixed with oil.'
+      },
+      'Grass Cutter': {
+        options: [
+          { value: '2-Stroke', label: '2-Stroke (common for heavy-duty clearing)' },
+          { value: '4-Stroke', label: '4-Stroke (quieter, more fuel-efficient)' }
+        ],
+        helper: 'Grass cutters may use 2-stroke or 4-stroke gasoline engines depending on use.'
+      }
+    };
+
+    let deferredPrompt = null;
+    let calculationHistory = [];
+    let calculationCounter = 0;
+
+    function formatNumber(value) {
+      return Number(value).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function populateWeeks() {
+      const weekSelect = document.getElementById('priceWeek');
+      weekSelect.innerHTML = '<option value="">Select weekly period</option>';
+      Object.keys(WEEKLY_PRICES).forEach((key) => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = WEEKLY_PRICES[key].label;
+        weekSelect.appendChild(option);
+      });
+    }
+
+    function populateFuelProducts() {
+      const fuelTypeSelect = document.getElementById('fuelType');
+      const vehicleType = document.getElementById('vehicleType').value;
+      const engineType = document.getElementById('engineType').value;
+      const productSelect = document.getElementById('fuelProduct');
+      const fuelHelper = document.getElementById('fuelTypeHelper');
+
+      if ((vehicleType === 'Chainsaw' || vehicleType === 'Grass Cutter') && fuelTypeSelect.value !== 'Gasoline') {
+        fuelTypeSelect.value = 'Gasoline';
+      }
+
+      const fuelType = fuelTypeSelect.value;
+      const options = PRODUCT_OPTIONS[fuelType] || [];
+
+      if (vehicleType === 'Chainsaw' || vehicleType === 'Grass Cutter') {
+        fuelHelper.textContent = engineType === '2-Stroke'
+          ? 'Uses gasoline and requires a fuel-oil mix for 2-stroke engines.'
+          : engineType === '4-Stroke'
+            ? 'Uses gasoline only. 4-stroke engines do not require premixing oil with fuel.'
+            : 'These equipment types commonly use gasoline engines.';
+      } else {
+        fuelHelper.textContent = 'Select the fuel used by this vehicle or equipment.';
+      }
+
+      productSelect.innerHTML = '<option value="">Select fuel product</option>';
+      options.forEach((item) => {
+        const option = document.createElement('option');
+        option.value = item.value;
+        option.textContent = item.label;
+        productSelect.appendChild(option);
+      });
+
+      syncRateAndTotal();
+    }
+
+    function getSelectedWeeklyRate() {
+      const fuelType = document.getElementById('fuelType').value;
+      const weekKey = document.getElementById('priceWeek').value;
+      const product = document.getElementById('fuelProduct').value;
+
+      if (fuelType === 'Electric') return null;
+      if (!weekKey || !product || !WEEKLY_PRICES[weekKey] || weekKey === 'manual_period') return null;
+      return WEEKLY_PRICES[weekKey][product] ?? null;
+    }
+
+    function updateEquipmentRules() {
+      const vehicleType = document.getElementById('vehicleType').value;
+      const otherField = document.getElementById('vehicleTypeOtherField');
+      const otherInput = document.getElementById('vehicleTypeOther');
+      const engineField = document.getElementById('engineTypeField');
+      const engineSelect = document.getElementById('engineType');
+      const engineHelper = document.getElementById('engineTypeHelper');
+      const fuelType = document.getElementById('fuelType');
+      const fuelHelper = document.getElementById('fuelTypeHelper');
+      const vehicleCategory = document.getElementById('vehicleCategory');
+      const distanceInput = document.getElementById('distance');
+      const distanceHelper = document.getElementById('distanceHelper');
+      const showOther = vehicleType === 'Others';
+      const engineConfig = ENGINE_OPTIONS[vehicleType] || null;
+      const machineryType = vehicleType === 'Chainsaw' || vehicleType === 'Grass Cutter' || vehicleType === 'Others';
+
+      otherField.style.display = showOther ? 'flex' : 'none';
+      if (!showOther) otherInput.value = '';
+
+      if (engineConfig) {
+        engineField.style.display = 'flex';
+        engineSelect.innerHTML = '';
+        engineConfig.options.forEach((item) => {
+          const option = document.createElement('option');
+          option.value = item.value;
+          option.textContent = item.label;
+          engineSelect.appendChild(option);
+        });
+        engineHelper.textContent = engineConfig.helper;
+        fuelType.value = 'Gasoline';
+        fuelHelper.textContent = engineSelect.value === '2-Stroke'
+          ? 'Uses gasoline and requires a fuel-oil mix for 2-stroke engines.'
+          : 'Uses gasoline only. 4-stroke engines do not require premixing oil with fuel.';
+      } else {
+        engineField.style.display = 'none';
+        engineSelect.innerHTML = '<option value="">Not applicable</option>';
+        fuelHelper.textContent = 'Select the fuel used by this vehicle or equipment.';
+      }
+
+      if (machineryType) {
+        vehicleCategory.value = 'Not Applicable';
+        vehicleCategory.disabled = true;
+        distanceInput.value = '';
+        distanceInput.disabled = true;
+        distanceInput.dataset.na = 'true';
+        distanceInput.placeholder = 'Not Applicable';
+        distanceHelper.textContent = 'Distance is not applicable for Chainsaw, Grass Cutter, and Others.';
+      } else {
+        vehicleCategory.disabled = false;
+        if (vehicleCategory.value === 'Not Applicable') {
+          vehicleCategory.value = '';
+        }
+        distanceInput.disabled = false;
+        distanceInput.dataset.na = 'false';
+        distanceInput.placeholder = 'Enter distance traveled';
+        distanceHelper.textContent = 'Enter distance traveled for vehicle-based computation.';
+      }
+    }
+
+    function toggleOtherVehicleType() {
+      updateEquipmentRules();
+      populateFuelProducts();
+    }
+
+    function syncRateAndTotal() {
+      const rateInput = document.getElementById('costPerLiter');
+      const totalCostInput = document.getElementById('totalCost');
+      const rateCard = document.getElementById('rateCard');
+      const totalCostCard = document.getElementById('totalCostCard');
+      const manualWeekInput = document.getElementById('manualWeekPeriod');
+      const selectedWeek = document.getElementById('priceWeek').value;
+      const consumption = parseFloat(document.getElementById('consumption').value) || 0;
+      const rate = getSelectedWeeklyRate();
+
+      manualWeekInput.readOnly = selectedWeek !== 'manual_period';
+      if (selectedWeek !== 'manual_period') manualWeekInput.value = '';
+
+      if (rate !== null) {
+        rateInput.value = rate.toFixed(2);
+        rateInput.readOnly = true;
+        totalCostInput.value = (consumption * rate).toFixed(2);
+        totalCostInput.readOnly = true;
+        rateCard.textContent = formatNumber(rate);
+        totalCostCard.textContent = formatNumber(consumption * rate);
+      } else {
+        rateInput.readOnly = false;
+        totalCostInput.readOnly = false;
+        const currentRate = parseFloat(rateInput.value) || 0;
+        const currentTotal = parseFloat(totalCostInput.value) || 0;
+        rateCard.textContent = currentRate ? formatNumber(currentRate) : '0.00';
+        totalCostCard.textContent = currentTotal ? formatNumber(currentTotal) : '0.00';
+      }
+    }
+
+
+    function renderCalculationHistory() {
+      const historyTableBody = document.getElementById('historyTableBody');
+      const grandTotalValue = document.getElementById('grandTotalValue');
+      if (!historyTableBody || !grandTotalValue) return;
+
+      if (!calculationHistory.length) {
+        historyTableBody.innerHTML = `
+          <tr id="historyEmptyRow">
+            <td colspan="11" style="text-align:center; color:#5f7d95;">No calculated entries yet.</td>
+          </tr>
+        `;
+        grandTotalValue.textContent = '0.00';
+        return;
+      }
+
+      historyTableBody.innerHTML = calculationHistory.map((item, index) => `
+        <tr class="${index === calculationHistory.length - 1 ? 'latest-entry' : ''}">
+          <td>${item.entryNo}</td>
+          <td>${item.monthly}</td>
+          <td>${item.plateNumber}</td>
+          <td>${item.vehicleCategory}</td>
+          <td>${item.vehicleType}</td>
+          <td>${item.vehicleName}</td>
+          <td>${item.fuelType}</td>
+          <td class="num">${formatNumber(item.consumption)} ${item.consumptionUnit}</td>
+          <td class="${item.distanceLabel === 'Not Applicable' ? 'na' : 'num'}">${item.distanceLabel}</td>
+          <td class="money">${formatNumber(item.rate)}</td>
+          <td class="money"><strong>${formatNumber(item.totalCost)}</strong></td>
+        </tr>
+      `).join('');
+
+      const grandTotal = calculationHistory.reduce((sum, item) => sum + item.totalCost, 0);
+      grandTotalValue.textContent = formatNumber(grandTotal);
+    }
+
+    function scrollToHistoryBottom() {
+      const historySection = document.getElementById('historySection');
+      if (!historySection) return;
+
+      setTimeout(() => {
+        historySection.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 120);
+    }
+
+    function resetFormForNextEntry() {
+      const fuelForm = document.getElementById('fuelForm');
+      if (fuelForm) fuelForm.reset();
+
+      document.getElementById('brand').value = 'Petron';
+      document.getElementById('vehicleType').value = '';
+      document.getElementById('vehicleTypeOther').value = '';
+      document.getElementById('monthSelect').value = '';
+      document.getElementById('manualWeekPeriod').value = '';
+
+      toggleOtherVehicleType();
+      populateFuelProducts();
+      syncRateAndTotal();
+
+      document.getElementById('fuelEfficiency').textContent = '0.00';
+      document.getElementById('costPerKm').textContent = '0.00';
+      document.getElementById('rateCard').textContent = '0.00';
+      document.getElementById('totalCostCard').textContent = '0.00';
+      document.getElementById('summaryBox').innerHTML = 'Entry saved below. Enter the next vehicle or machinery details and tap <strong>Calculate</strong> again.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function calculateFuelData() {
+      syncRateAndTotal();
+
+      const plateNumber = document.getElementById('plateNumber').value.trim();
+      const vehicleCategory = document.getElementById('vehicleCategory').value;
+      const vehicleTypeSelection = document.getElementById('vehicleType').value;
+      const vehicleTypeOther = document.getElementById('vehicleTypeOther').value.trim();
+      const vehicleType = vehicleTypeSelection === 'Others' ? (vehicleTypeOther || 'Others') : vehicleTypeSelection;
+      const engineType = document.getElementById('engineTypeField').style.display === 'none'
+        ? ''
+        : document.getElementById('engineType').value;
+      const fuelType = document.getElementById('fuelType').value;
+      const priceWeek = document.getElementById('priceWeek').value;
+      const fuelProduct = document.getElementById('fuelProduct').selectedOptions[0]?.textContent || '-';
+      const consumption = parseFloat(document.getElementById('consumption').value) || 0;
+      const distanceInput = document.getElementById('distance');
+      const distanceNotApplicable = distanceInput.disabled || distanceInput.dataset.na === 'true';
+      const distance = distanceNotApplicable ? 0 : (parseFloat(distanceInput.value) || 0);
+      const rate = parseFloat(document.getElementById('costPerLiter').value) || 0;
+      const totalCost = parseFloat(document.getElementById('totalCost').value) || 0;
+      const brand = document.getElementById('brand').value.trim();
+      const vehicleName = document.getElementById('vehicleName').value.trim();
+      const model = document.getElementById('model').value.trim();
+      const yearAcquired = document.getElementById('yearAcquired').value.trim();
+      const transmission = document.getElementById('transmission').value;
+      const ownership = document.getElementById('ownership').value;
+      const monthly = document.getElementById('monthly').value;
+
+      const isElectric = vehicleCategory === 'Electric Vehicle';
+      const fuelEfficiency = !distanceNotApplicable && consumption > 0 ? distance / consumption : 0;
+      const costPerKm = !distanceNotApplicable && distance > 0 ? totalCost / distance : 0;
+      const efficiencyUnit = isElectric ? 'km/kWh' : 'km/L';
+      const consumptionUnit = isElectric ? 'kWh' : 'L';
+      const selectedWeek = priceWeek === 'manual_period'
+        ? (document.getElementById('manualWeekPeriod').value.trim() || 'Manual Weekly Period')
+        : (priceWeek ? WEEKLY_PRICES[priceWeek].label : '-');
+      const equipmentFuelNote = vehicleTypeSelection === 'Chainsaw'
+        ? '2-stroke gasoline engine; fuel-oil mix required.'
+        : vehicleTypeSelection === 'Grass Cutter' && engineType === '2-Stroke'
+          ? '2-stroke grass cutter; fuel-oil mix required.'
+          : vehicleTypeSelection === 'Grass Cutter' && engineType === '4-Stroke'
+            ? '4-stroke grass cutter; no fuel-oil premix required.'
+            : vehicleTypeSelection === 'Others'
+              ? 'Other machinery selected.'
+              : '-';
+      const categoryLabel = vehicleCategory || '-';
+      const distanceLabel = distanceNotApplicable ? 'Not Applicable' : `${formatNumber(distance)} km`;
+      const fuelEfficiencyLabel = distanceNotApplicable ? 'Not Applicable' : `${formatNumber(fuelEfficiency)} ${efficiencyUnit}`;
+      const costPerKmLabel = distanceNotApplicable ? 'Not Applicable' : formatNumber(costPerKm);
+
+      document.getElementById('fuelEfficiency').textContent = fuelEfficiencyLabel;
+      document.getElementById('costPerKm').textContent = costPerKmLabel;
+      document.getElementById('rateCard').textContent = rate ? formatNumber(rate) : '0.00';
+      document.getElementById('totalCostCard').textContent = totalCost ? formatNumber(totalCost) : '0.00';
+
+      document.getElementById('summaryBox').innerHTML = `
+        <strong>Vehicle Summary</strong><br>
+        <strong>Plate/MVUC/Machinery:</strong> ${plateNumber || '-'}<br>
+        <strong>Category:</strong> ${categoryLabel}<br>
+        <strong>Vehicle / Machinery Type:</strong> ${(vehicleType === 'Others' ? (vehicleTypeOther || 'Others') : (vehicleType || '-'))}<br>
+        <strong>Engine Type:</strong> ${engineType || 'Not Applicable'}<br>
+        <strong>Fuel Type:</strong> ${fuelType || '-'}<br>
+        <strong>Fuel Guidance:</strong> ${equipmentFuelNote}<br>
+        <strong>Weekly Period:</strong> ${selectedWeek}<br>
+        <strong>Fuel Product:</strong> ${fuelProduct}<br>
+        <strong>Selected Weekly Cost per Liter:</strong> ${rate ? formatNumber(rate) : '-'}<br>
+        <strong>Brand:</strong> ${brand || '-'}<br>
+        <strong>Name of Vehicle or Machinery:</strong> ${vehicleName || '-'}<br>
+        <strong>Model:</strong> ${model || '-'}<br>
+        <strong>Year Acquired:</strong> ${yearAcquired || '-'}<br>
+        <strong>Transmission:</strong> ${transmission || '-'}<br>
+        <strong>Ownership:</strong> ${ownership || '-'}<br>
+        <strong>Monthly:</strong> ${monthly || '-'}<br><br>
+        <strong>Consumption:</strong> ${formatNumber(consumption)} ${consumptionUnit}<br>
+        <strong>Distance:</strong> ${distanceLabel}<br>
+        <strong>Total Cost:</strong> ${formatNumber(totalCost)}<br>
+        <strong>Fuel Efficiency:</strong> ${fuelEfficiencyLabel}<br>
+        <strong>Cost per Kilometer:</strong> ${costPerKmLabel}<br><br>
+        <strong>Formula Used:</strong><br>
+        Weekly Cost per Liter = selected weekly fuel price based on Period + Fuel Product<br>
+        Total Cost = Consumption × Weekly Cost per Liter<br>
+        Fuel Efficiency = Distance ÷ Consumption<br>
+        Cost per Kilometer = Total Cost ÷ Distance
+      `;
+
+      calculationCounter += 1;
+      calculationHistory.push({
+        entryNo: calculationCounter,
+        monthly: monthly || '-',
+        plateNumber: plateNumber || '-',
+        vehicleCategory: categoryLabel,
+        vehicleType: (vehicleType === 'Others' ? (vehicleTypeOther || 'Others') : (vehicleType || '-')),
+        vehicleName: vehicleName || '-',
+        rate: rate || 0,
+        consumption: consumption || 0,
+        consumptionUnit,
+        distance: distance || 0,
+        distanceLabel,
+        totalCost: totalCost || 0
+      });
+
+      renderCalculationHistory();
+      scrollToHistoryBottom();
+      resetFormForNextEntry();
+    }
+
+    function resetResults() {
+      setTimeout(() => {
+        document.getElementById('fuelEfficiency').textContent = '0.00 km/L';
+        document.getElementById('costPerKm').textContent = '0.00';
+        document.getElementById('rateCard').textContent = '0.00';
+        document.getElementById('totalCostCard').textContent = '0.00';
+        document.getElementById('summaryBox').innerHTML = 'Enter vehicle or machinery details and tap <strong>Calculate</strong> to see the result summary. Each calculation is added below. For <strong>Chainsaw</strong>, <strong>Grass Cutter</strong>, and <strong>Others</strong>, the result and total will also appear below.';
+        calculationHistory = [];
+        calculationCounter = 0;
+        renderCalculationHistory();
+        populateWeeks();
+        populateFuelProducts();
+        toggleOtherVehicleType();
+      }, 0);
+    }
+
+    document.getElementById('vehicleType').addEventListener('change', toggleOtherVehicleType);
+    document.getElementById('engineType').addEventListener('change', populateFuelProducts);
+    document.getElementById('fuelType').addEventListener('change', populateFuelProducts);
+    document.getElementById('priceWeek').addEventListener('change', syncRateAndTotal);
+    document.getElementById('fuelProduct').addEventListener('change', syncRateAndTotal);
+    document.getElementById('manualWeekPeriod').addEventListener('input', syncRateAndTotal);
+    document.getElementById('consumption').addEventListener('input', syncRateAndTotal);
+    document.getElementById('costPerLiter').addEventListener('input', syncRateAndTotal);
+    document.getElementById('totalCost').addEventListener('input', syncRateAndTotal);
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      const tip = document.getElementById('installTip');
+      tip.innerHTML = 'This app can be installed. In Chrome, open the browser menu and tap <strong>Install app</strong> or <strong>Add to Home Screen</strong>.';
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      });
+    }
+
+    populateWeeks();
+    populateFuelProducts();
+    toggleOtherVehicleType();
+    renderCalculationHistory();
+  </script>
+</body>
+</html>
